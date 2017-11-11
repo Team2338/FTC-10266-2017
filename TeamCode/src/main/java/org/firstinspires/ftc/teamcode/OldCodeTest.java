@@ -11,21 +11,24 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 @TeleOp(name="OldCodeTest", group="Iterative OpMode")  // @Autonomous(...) is the other common choice
-//@Disabled
-public class OldCodeTest extends OpMode
-{
+@Disabled
+public class OldCodeTest extends OpMode {
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
     DcMotor frontLeftMotor;
     DcMotor frontRightMotor;
-   // DcMotor backLeftMotor;
-    //DcMotor backRightMotor;
+//    DcMotor backLeftMotor;
+//    DcMotor backRightMotor;
 
-   // DcMotor intakeLowMotor;
-   // DcMotor intakeHighMotor;
+    DcMotor liftMotor;
+    Servo servo0;
+    Servo servo1;
 
-   // DcMotor leftShooterMotor;
-   // DcMotor rightShooterMotor;
+    // DcMotor intakeLowMotor;
+    // DcMotor intakeHighMotor;
+
+    // DcMotor leftShooterMotor;
+    // DcMotor rightShooterMotor;
 
 
     //static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
@@ -37,11 +40,11 @@ public class OldCodeTest extends OpMode
     //double  positionb = (MAX_POS - MIN_POS) / 2;
 
     // Define class members
-   // Servo servo2;
-   // Servo servo3;
-    Servo servo0;
-    Servo servo1;
-   // double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+    // Servo servo2;
+    // Servo servo3;
+    //Servo servo0;
+    //Servo servo1;
+    // double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
     //boolean rampUp = true;
 
     /*
@@ -55,10 +58,12 @@ public class OldCodeTest extends OpMode
          * to 'get' must correspond to the names assigned during the robot configuration
          * step (using the FTC Robot Controller app on the phone).
          */
-        frontLeftMotor  = hardwareMap.dcMotor.get("frontLeftDrive");
+        frontLeftMotor = hardwareMap.dcMotor.get("frontLeftDrive");
         frontRightMotor = hardwareMap.dcMotor.get("frontRightDrive");
-        //backLeftMotor = hardwareMap.dcMotor.get("backLeftDrive");
-        //backRightMotor = hardwareMap.dcMotor.get("backRightDrive");
+//        backLeftMotor = hardwareMap.dcMotor.get("backLeftDrive");
+//        backRightMotor = hardwareMap.dcMotor.get("backRightDrive");
+
+        liftMotor = hardwareMap.dcMotor.get("liftMotor");
 
         //intakeLowMotor = hardwareMap.dcMotor.get("collectorLow");
         //intakeHighMotor = hardwareMap.dcMotor.get("collectorHigh");
@@ -70,7 +75,6 @@ public class OldCodeTest extends OpMode
         servo1 = hardwareMap.servo.get("servo1"); //capball
         //servo2 = hardwareMap.servo.get("servo2");  //actuator 1
         //servo3 = hardwareMap.servo.get("servo3"); //actuator 2
-
 
 
         // eg: Set the drive motor directions:
@@ -111,8 +115,7 @@ public class OldCodeTest extends OpMode
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
     @Override
-    public void loop() {
-        /*
+    public void loop() {        /*
         if (rampUp) {
             telemetry.addData("In Rampup", 1);
 
@@ -133,26 +136,52 @@ public class OldCodeTest extends OpMode
         }
         */
 
-        telemetry.addData("Status", "Running: " + runtime.toString());
+        //telemetry.addData("Status", "Running: " + runtime.toString());
         telemetry.addData("Front Left Ticks:", frontLeftMotor.getCurrentPosition());
         telemetry.addData("Front Right Ticks", frontRightMotor.getCurrentPosition());
         telemetry.addData("Motor Output", "Front Left" + frontLeftMotor.getPower());
         telemetry.addData("Motor Output", "Front Right" + frontRightMotor.getPower());
         //telemetry.addData("Motor Output", "Rear Left" + backLeftMotor.getPower());
-       // telemetry.addData("Motor Output", "Rear Right" + backRightMotor.getPower());
+        //telemetry.addData("Motor Output", "Rear Right" + backRightMotor.getPower());
 
 
         frontLeftMotor.setPower(gamepad1.left_stick_y);
         frontRightMotor.setPower(-gamepad1.right_stick_y);
-       // backLeftMotor.setPower(gamepad1.left_stick_y);
-       // backRightMotor.setPower(-gamepad1.right_stick_y);
+        //backLeftMotor.setPower(gamepad1.left_stick_y);
+        //backRightMotor.setPower(-gamepad1.right_stick_y);
 
-       // if(gamepad2.dpad_down) {
-          //  intakeHighMotor.setPower(1);
+        // if(gamepad2.dpad_down) {
+        //  intakeHighMotor.setPower(1);
         //}
         // KEEP, worked for grabber arm
-        /*
-        if (gamepad1.a) {
+
+        //.35 was the speed for #1 lifter
+        //.70 was the speed for #2 lifter
+        if (gamepad2.y) {
+            liftMotor.setPower(.70);
+        } else if (gamepad2.a) {
+            liftMotor.setPower(-.70);
+        } else {
+            liftMotor.setPower(0);
+        }
+
+        if (gamepad2.x) {
+            servo0.setPosition(1);
+            servo1.setPosition(0);
+        }
+        else {
+            servo0.setPosition(0);
+            servo1.setPosition(1);
+        }
+        if(gamepad1.right_bumper) {
+            frontLeftMotor.setPower(.2);
+            frontRightMotor.setPower(-.2);
+        }
+        if(gamepad1.left_bumper) {
+            frontLeftMotor.setPower(-.2);
+            frontRightMotor.setPower(.2);
+        }
+            /*
             servo0.setPosition(1);
             servo1.setPosition(0);
         } else {
@@ -160,60 +189,59 @@ public class OldCodeTest extends OpMode
             servo1.setPosition(1);
         }
         */
-        if (gamepad1.a) {
-            servo0.setPosition(1);
-        } else {
-            servo0.setPosition(0);
-        }
-       //if (gamepad2.x) {
-          //  positionx += INCREMENT;
-          //  if (positionx >= MAX_POS) {
-                //positionx = MAX_POS;
+        //if (gamepad1.a) {
+        //    servo0.setPosition(1);
+        //} else {
+        //    servo0.setPosition(0);
+//        /}
+        //  positionx += INCREMENT;
+        //  if (positionx >= MAX_POS) {
+        //positionx = MAX_POS;
 
-           // }
-            //servo3.setPosition(positionx);
-      //  }
-       // else {
-         //   positionx -= INCREMENT;
-          //  if (positionx <= MIN_POS) {
-            //    positionx = MIN_POS;
+        // }
+        //servo3.setPosition(positionx);
+        //  }
+        // else {
+        //   positionx -= INCREMENT;
+        //  if (positionx <= MIN_POS) {
+        //    positionx = MIN_POS;
 
-           // }
-           // servo3.setPosition(positionx);
-       // }
+        // }
+        // servo3.setPosition(positionx);
+        // }
 
         //if (gamepad2.b) {
-         //   positionb += INCREMENT;
-          //  if (positionb >= MAX_POS) {
-           //     positionb = MAX_POS;
-           //     servo2.setPosition(positionb);
-           // }
+        //   positionb += INCREMENT;
+        //  if (positionb >= MAX_POS) {
+        //     positionb = MAX_POS;
+        //     servo2.setPosition(positionb);
+        // }
 
-       // } else {
-         //   positionb -= INCREMENT;
-           // if (positionb <= MIN_POS) {
-            //    positionb = MIN_POS;
-           // }
-          //  servo2.setPosition(positionb);
-      //  }
+        // } else {
+        //   positionb -= INCREMENT;
+        // if (positionb <= MIN_POS) {
+        //    positionb = MIN_POS;
+        // }
+        //  servo2.setPosition(positionb);
+        //  }
 
-      //  if (gamepad2.left_bumper) {
-       //     intakeLowMotor.setPower(-1);
-       // } else if (gamepad2.right_bumper) {
-       //     intakeHighMotor.setPower(-1);
+        //  if (gamepad2.left_bumper) {
+        //     intakeLowMotor.setPower(-1);
+        // } else if (gamepad2.right_bumper) {
+        //     intakeHighMotor.setPower(-1);
         //} else {
         ///    intakeLowMotor.setPower(0);
-         //   intakeHighMotor.setPower(0);
-       // }
-       // if (gamepad2.y) {
+        //   intakeHighMotor.setPower(0);
+        // }
+        // if (gamepad2.y) {
         //    leftShooterMotor.setPower(1);
         //    rightShooterMotor.setPower(-1);
-       // } else {
-          //  leftShooterMotor.setPower(0);
-         //   rightShooterMotor.setPower(0);
+        // } else {
+        //  leftShooterMotor.setPower(0);
+        //   rightShooterMotor.setPower(0);
 
 
-       // }
+        // }
 
     }
 
