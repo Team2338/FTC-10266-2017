@@ -2,9 +2,9 @@
  * Created by Mach Speed Programming on 10/31/2017.
  */
 
+// AUTO RED BACK   AUTONOMOUS BY TIME WITH COLOR, DISTANCE and TOUCH CODE
 
-// AUTONOMOUS BY TIME WITH COLOR, DISTANCE and TOUCH CODE
-
+package org.firstinspires.ftc.teamcode;
 import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
@@ -18,11 +18,9 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import java.util.Locale;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.Servo;
-
 //package org.firstinspires.ftc.robotcontroller.external.samples;
 
 @Autonomous(name = "AutoRedBack", group = "Sensor")
@@ -31,7 +29,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class AutoRedBack extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
-
 
     DcMotor backleftmotor;
     DcMotor backrightmotor;
@@ -50,6 +47,27 @@ public class AutoRedBack extends LinearOpMode {
     Boolean Isblue;
 
     int ColorBlue = 0;
+
+    //START AND END PARMS
+    double StartTime    = 0.0;
+    double EndTime      = 0.0;
+
+    //BELOW VALUES IN SECONDS
+    double StepOneReset    = 1.0;    //Step 1
+    double DropColorArm    = 2.0;
+    double ReadColor       = 2.0;
+    double KnockOffBall    = 0.1;
+    double ResetMove       = 0.1;
+    double Stop            = 2.0;
+    double RaiseColorArm   = 3.0;
+    double MoveOffBoard    = 0.4; //was .5
+    double Spin            = 0.4; //was .2
+    double MoveToWall      = 0.3;  //was .6
+    double DropGlyph       = 1.0;
+    double BackUp          = 0.5; //was .3
+    double PushGlyph       = 0.4;
+    double BackUpFinal     = 0.05;
+
 
     @Override
     public void runOpMode() {
@@ -108,33 +126,55 @@ public class AutoRedBack extends LinearOpMode {
 
             // Send the info back to driver station using telemetry function.
 
-
+            telemetry.update();
             telemetry.addData("Motor Output ", "Back Left" + backleftmotor.getPower());
             telemetry.addData("Motor Output ", "Back Right" + backrightmotor.getPower());
+            //telemetry.addData("Distance (cm)", String.format(Locale.US, "%.02f", sensordistance.getDistance(DistanceUnit.CM)));
+            //telemetry.addData("Hue", hsvValues[0]);
 
-            telemetry.addData("Distance (cm)",
-                    String.format(Locale.US, "%.02f", sensordistance.getDistance(DistanceUnit.CM)));
-            telemetry.addData("Hue", hsvValues[0]);
+            //
+            //RESET RUNTIME, STOP MOTORS
+            //
+            StartTime = 0;
+            EndTime = StartTime + StepOneReset;
 
             //RESET RUNTIME
-            if (runtime.seconds() >= 0 && runtime.seconds() <= 1) {
-                telemetry.addData("Runtime Reset ", "Running: " + runtime.toString());
-                //servo0.setPosition(0);
-               // servo1.setPosition(1); //CLAMP GLYPH
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Start Reset ", "1");
+                //telemetry.addData("StartTime   ", StartTime);
+                //telemetry.addData("EndTime     ", EndTime);
 
                 backleftmotor.setPower(0);
                 backrightmotor.setPower(0);
+
+                //servo0.setPosition(0);
+                // servo1.setPosition(1); //CLAMP GLYPH
             }
 
-            //DROP SERVO
-            if (runtime.seconds() >= 1.1 && runtime.seconds() <= 3) {
-                telemetry.addData("In Drop Servo2 ", "Running: " + runtime.toString());
-                servo2.setPosition(1);
+            //
+            //DROP COLOR ARM
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + DropColorArm;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Drop Color  ", "2");
+                //telemetry.addData("StartTime   ", StartTime);
+                //telemetry.addData("EndTime     ", EndTime);
+
+                servo2.setPosition(1); //Drop Color Arm
             }
 
+            //
             //READ COLOR
-            if (runtime.seconds() >= 3.1 && runtime.seconds() < 5) {
-                telemetry.addData("In Read Color ", "Running: " + runtime.toString());
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + ReadColor;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Read Color ", "3");
+                //telemetry.addData("StartTime   ", StartTime);
+                //telemetry.addData("EndTime     ", EndTime);
 
                 // ASSUME WE ARE RED TEAM
                 // ASSUME SENSOR FACING BACKWARDS ON ROBOT ON RIGHT SIDE
@@ -142,116 +182,314 @@ public class AutoRedBack extends LinearOpMode {
                 if (hsvValues[0] >= 150 && hsvValues[0] <= 250) {
                     //add variable
                     ColorBlue = 1;
-                    telemetry.addData("In Blue If TRUE ", sensorcolor.blue());
+                    telemetry.addData("In Blue, If TRUE ", sensorcolor.blue());
                     telemetry.addData("Hue", hsvValues[0]);
 
                 } else {
-                    telemetry.addData("In Red Else FALSE ", sensorcolor.red());
+                    telemetry.addData("In Red, Else FALSE ", sensorcolor.red());
                     telemetry.addData("Hue", hsvValues[0]);
                     ColorBlue = 0;
-
                 }
-
             }
 
-            // DO NOTHING
-            /*if(runtime.seconds() >= 5.1 && runtime.seconds() <= 10) {
-                backleftmotor.setPower(0);
-                backrightmotor.setPower(0);
-            }
-*/
-
+            //
             // MOVE TO KNOCK OFF BALL
-            if (runtime.seconds() >= 5.1 && runtime.seconds() <= 5.4) {
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + KnockOffBall;
 
-                telemetry.addData("ColorBlue ", ColorBlue);
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Knock Off Ball ", "4");
+                telemetry.addData("StartTime   ", StartTime);
+                telemetry.addData("EndTime     ", EndTime);
 
                 if (ColorBlue == 1) {
-                    telemetry.addData("In 2 Second Move Backwards TRUE ", "Running: " + runtime.toString());
-                    backleftmotor.setPower(.2);   //Move Back
+                    telemetry.addData("Knock Off Ball, Backward TRUE ", "Running: " + runtime.toString());
+                    backleftmotor.setPower(-.2);   //Move Back
                     backrightmotor.setPower(-.2);
                     //liftmotor.setPower(1);
                 } else {
-                    telemetry.addData("In 2 Second Move forward FALSE ", "Running: " + runtime.toString());
-                    backleftmotor.setPower(-.2);   //Move Forward
+                    telemetry.addData("Knock off Ball, Forward FALSE ", "Running: " + runtime.toString());
+                    backleftmotor.setPower(.2);   //Move Forward
                     backrightmotor.setPower(.2);
+                    //servo0.setPosition(0);
+                    //servo1.setPosition(1);
+
                     //liftmotor.setPower(1);
                     // finish red
                 }
             }
+            //
             //STOP
-            if(runtime.seconds() >= 5.5 && runtime.seconds() <= 6.0) {
-                telemetry.addData("STOP After Knock ", "Running: " + runtime.toString());
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + Stop;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("STOP After Knock ", "5");
+                telemetry.addData("StartTime   ", StartTime);
+                telemetry.addData("EndTime     ", EndTime);
 
                 backleftmotor.setPower(0);     //Stop
                 backrightmotor.setPower(0);     //Stop
             }
 
-            //RAISE SERVO
-            if (runtime.seconds() >= 7.0 && runtime.seconds() <= 9) {
-                telemetry.addData("In Raise Servo2 ", "Running: " + runtime.toString());
+            //
+            //RAISE COLOR ARM
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + RaiseColorArm;
 
-                servo2.setPosition(0);
-                //liftmotor.setPower(0);
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Raise Color Arm ", "6");
+                //telemetry.addData("StartTime   ", StartTime);
+                //telemetry.addData("EndTime     ", EndTime);
+
+                servo2.setPosition(0);    //Raise Color Arm
+            }
+            //
+            //RESET
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + ResetMove;
+
+            if(runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                if (ColorBlue == 1) {
+                    telemetry.addData("Knock Off Ball, Backward TRUE ", "Running: " + runtime.toString());
+                    backleftmotor.setPower(.2);   //Move Back
+                    backrightmotor.setPower(.2);
+                    //liftmotor.setPower(1);
+                } else {
+                    telemetry.addData("Knock off Ball, Forward FALSE ", "Running: " + runtime.toString());
+                    backleftmotor.setPower(-.2);   //Move Forward
+                    backrightmotor.setPower(-.2);
+                }
             }
 
+            //
+            //STOP
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + Stop;
 
-            //MOVE FORWARD OFF RAMP
-            if(runtime.seconds() >= 10.1 && runtime.seconds() <= 11.0) {
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("STOP After Knock ", "5");
+                //telemetry.addData("StartTime   ", StartTime);
+                //telemetry.addData("EndTime     ", EndTime);
+
+                backleftmotor.setPower(0);     //Stop
+                backrightmotor.setPower(0);     //Stop
+            }
+
+            //
+            //MOVE OFF BOARD, FORWARD
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + MoveOffBoard;
+
+            if(runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Move Off Board ", "7");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
                 if (ColorBlue == 1 ) {
                     telemetry.addData("In Move Forward BLUE ", "Running: " + runtime.toString());
                     backleftmotor.setPower(-.4);     //Faster FORWARD
-                    backrightmotor.setPower(.5);     //Faster FORWARD
+                    backrightmotor.setPower(.4);     //Faster FORWARD
                 }
                 else {
                     telemetry.addData("In Move Forward RED ", "Running: " + runtime.toString());
                     backleftmotor.setPower(-.4);     //Faster FORWARD
-                    backrightmotor.setPower(.5);     //Faster FORWARD
+                    backrightmotor.setPower(.4);     //Faster FORWARD
 
                 }
             }
 
+            //
             //STOP
-            if(runtime.seconds() >= 11.1 && runtime.seconds() <= 13.0) {
-                telemetry.addData("STOP After Ramp ", "Running: " + runtime.toString());
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + Stop;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("STOP After Knock ", "8");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
+                backleftmotor.setPower(0);     //Stop
+                backrightmotor.setPower(0);     //Stop
+            }
+
+            //
+            //SPIN, Turn Left
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + Spin;
+
+            if(runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("SPIN Left       ", "9");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
+                backleftmotor.setPower(.4);   //Turn Left
+                backrightmotor.setPower(.4);  //Turn Left
+            }
+
+            //
+            //STOP
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + Stop;
+
+            if(runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("STOP          ", "10");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
                 backleftmotor.setPower(0);     //Stop
                 backrightmotor.setPower(0);     //Stop
 
             }
 
-/*            //SPIN SLOW, TURN RIGHT
-            if(runtime.seconds() >= 13.1 && runtime.seconds() <= 14.3) {
-                telemetry.addData("In Spin ", "Running: " + runtime.toString());
-                backleftmotor.setPower(-.4);   // Slow Turn Right
-                backrightmotor.setPower(-.4);  // Slow Turn Right
+            //
+            //MOVE TO WALL
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + MoveToWall;
+
+            if(runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Move to Wall  ", "11");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
+                backleftmotor.setPower(-.4);   //Forwards
+                backrightmotor.setPower(.4);   //Forwards
             }
 
+            //
             //STOP
-            if(runtime.seconds() >= 14.4 && runtime.seconds() <= 15.0) {
-                telemetry.addData("STOP After Spin ", "Running: " + runtime.toString());
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + Stop;
+
+            if(runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("STOP          ", "12");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
                 backleftmotor.setPower(0);     //Stop
                 backrightmotor.setPower(0);     //Stop
 
             }
 
-            //MOVE FORWARD TO WALL
-            if(runtime.seconds() >= 15.1 && runtime.seconds() <= 15.5) {
-                telemetry.addData("In Move Forward ", "Running: " + runtime.toString());
-                backleftmotor.setPower(-.4);     //Faster FORWARD
-                backrightmotor.setPower(.4);     //Faster FORWARD
+            //
+            //DROP GLYPH
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + DropGlyph;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Drop Glyph    ", "13");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
+                servo0.setPosition(0);    //Drop Glyph
+                servo1.setPosition(1);    //Drop Glyph
             }
 
-            //STOP DRIVE MOTORS
-            if(runtime.seconds() >= 15.6 && runtime.seconds() <= 20) {
-                telemetry.addData("STOP END ", "Running: " + runtime.toString());
+            //
+            //BACK UP AFTER DROP
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + BackUp;
+
+            if(runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Back Up After Drop ", "14");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
+                backleftmotor.setPower(.4);     //Backward
+                backrightmotor.setPower(-.4);     //Backward
+            }
+
+            //
+            //STOP
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + Stop;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("STOP AND CLOSE  ", "15");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
+                backleftmotor.setPower(0);     //Stop
+                backrightmotor.setPower(0);    //Stop
+
+                //servo0.setPosition(1); 		//Close Glyph
+                //servo1.setPosition(0); 		//Close Glyph
+            }
+
+            //
+            //PUSH GLYPH INTO BOX
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + PushGlyph;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Push Glyph    ", "16");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
+                backleftmotor.setPower(-.4);     //Forward
+                backrightmotor.setPower(.4);     //Forward
+            }
+
+            //
+            //STOP
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + Stop;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("STOP After Push ", "17");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
+                backleftmotor.setPower(0);     //STOP
+                backrightmotor.setPower(0);    //STOP
+
+            }
+
+            //
+            //BACK UP AFTER GLYPH PUSH
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + BackUpFinal;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("Back Up Final   ", "18");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
+                backleftmotor.setPower(.4);     //Backward
+                backrightmotor.setPower(-.4);     //Backward
+            }
+
+            //
+            //FINAL STOP
+            //
+            StartTime = EndTime + .1;
+            EndTime = StartTime + Stop;
+
+            if (runtime.seconds() >= StartTime && runtime.seconds() <= EndTime) {
+                telemetry.addData("FINAL STOP    ", "19");
+                //telemetry.addData("StartTime     ", StartTime);
+                //telemetry.addData("EndTime       ", EndTime);
+
                 backleftmotor.setPower(0);
                 backrightmotor.setPower(0);
-
-                servo0.setPosition(1);
-                servo1.setPosition(0); //CLAMP GLYPH
-
             }
-
             // change the background color to match the color detected by the RGB sensor.
             // pass a reference to the hue, saturation, and value array as an argument
             // to the HSVToColor method.
@@ -263,15 +501,15 @@ public class AutoRedBack extends LinearOpMode {
             });
 
             telemetry.update();
-        }
 
+        }
         // Set the panel back to the default color
         relativeLayout.post(new Runnable() {
             public void run() {
                 relativeLayout.setBackgroundColor(Color.WHITE);
-            }*/
-        }
+            }
+        });
+
     }
 }
-
 
