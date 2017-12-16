@@ -1,0 +1,51 @@
+This document was created by Josh Lovell from Mach Speed Programing on 11/25/2017.
+The purpose of this document is to prevent confusion on what direction the robot will move.
+
+Motor Movements:
+    -Forward: backleftmotor.setPower(-.4);
+              backrightmotor.setPower(.4);
+
+    -Backward: backleftmotor.setPower(-.4);
+               backrightmotor.setPower(.4);
+
+    -Spin Left: backleftmotor.setPower(.4);
+                backrightmotor.setPower(.4);
+
+    -Spin Right: backleftmotor.setPower(-.4);
+                 backrightmotor.setPower(-.4);
+
+Servo Movements: (WIP)
+
+0 0
+1 1
+10 2
+11
+100 4
+101
+110
+111
+1000 8
+1001
+1010
+1011
+1100
+1101
+1110
+1111
+10000 16
+10001
+10010
+10011
+10100
+10101
+10110
+10111
+11000
+11001
+11010
+11011
+11100
+11101
+11110
+11111
+100000 32
